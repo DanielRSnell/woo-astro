@@ -1,0 +1,113 @@
+@import "tailwindcss";
+
+@theme light {
+  /* Typography */
+  --font-display: "Inter", "system-ui", "sans-serif";
+
+  /* Colors - Neutral */
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0.2 0 0);
+
+  /* Colors - Primary */
+  --color-primary-100: oklch(0.98 0.02 240);
+  --color-primary-200: oklch(0.95 0.04 240);
+  --color-primary-300: oklch(0.9 0.06 240);
+  --color-primary-400: oklch(0.85 0.08 240);
+  --color-primary-500: oklch(0.8 0.1 240);
+  --color-primary-600: oklch(0.75 0.12 240);
+  --color-primary-700: oklch(0.7 0.14 240);
+  --color-primary-800: oklch(0.65 0.16 240);
+  --color-primary-900: oklch(0.6 0.18 240);
+
+  /* Colors - Gray */
+  --color-gray-100: oklch(0.98 0 0);
+  --color-gray-200: oklch(0.95 0 0);
+  --color-gray-300: oklch(0.9 0 0);
+  --color-gray-400: oklch(0.85 0 0);
+  --color-gray-500: oklch(0.8 0 0);
+  --color-gray-600: oklch(0.75 0 0);
+  --color-gray-700: oklch(0.7 0 0);
+  --color-gray-800: oklch(0.65 0 0);
+  --color-gray-900: oklch(0.6 0 0);
+
+  /* UI Colors */
+  --color-card: var(--color-background);
+  --color-card-foreground: var(--color-foreground);
+  --color-muted: var(--color-gray-100);
+  --color-muted-foreground: var(--color-gray-500);
+  --color-accent: var(--color-primary-100);
+  --color-accent-foreground: var(--color-primary-900);
+  --color-border: var(--color-gray-200);
+  --color-input: var(--color-gray-200);
+  --color-ring: var(--color-primary-500);
+
+  /* Animation */
+  --ease-default: cubic-bezier(0.2, 0, 0, 1);
+  --ease-bounce: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+
+  /* Radius */
+  --radius-sm: 0.25rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 1rem;
+
+  /* Status Colors - Dark Theme */
+  --color-success-light: oklch(0.3 0.1 140);
+  --color-success: oklch(0.4 0.12 140);
+  --color-success-dark: oklch(0.5 0.14 140);
+
+  --color-info-light: oklch(0.3 0.1 240);
+  --color-info: oklch(0.4 0.12 240);
+  --color-info-dark: oklch(0.5 0.14 240);
+
+  --color-warning-light: oklch(0.3 0.1 90);
+  --color-warning: oklch(0.4 0.12 90);
+  --color-warning-dark: oklch(0.5 0.14 90);
+
+  --color-error-light: oklch(0.3 0.1 30);
+  --color-error: oklch(0.4 0.12 30);
+  --color-error-dark: oklch(0.5 0.14 30);
+
+  /* Spacing */
+  --space-content: clamp(1rem, 5vw, 2rem);
+}
+
+@theme dark {
+  --color-background: oklch(0.2 0 0);
+  --color-foreground: oklch(0.98 0 0);
+
+  --color-card: oklch(0.25 0 0);
+  --color-card-foreground: oklch(0.98 0 0);
+  --color-muted: oklch(0.3 0 0);
+  --color-muted-foreground: oklch(0.7 0 0);
+  --color-accent: oklch(0.3 0.1 240);
+  --color-accent-foreground: oklch(0.98 0 0);
+  --color-border: oklch(0.3 0 0);
+  --color-input: oklch(0.3 0 0);
+  --color-ring: oklch(0.7 0.1 240);
+
+  /* Status Colors */
+  --color-success-light: oklch(0.9 0.1 140);
+  --color-success: oklch(0.8 0.12 140);
+  --color-success-dark: oklch(0.7 0.14 140);
+
+  --color-info-light: oklch(0.9 0.1 240);
+  --color-info: oklch(0.8 0.12 240);
+  --color-info-dark: oklch(0.7 0.14 240);
+
+  --color-warning-light: oklch(0.9 0.1 90);
+  --color-warning: oklch(0.8 0.12 90);
+  --color-warning-dark: oklch(0.7 0.14 90);
+
+  --color-error-light: oklch(0.9 0.1 30);
+  --color-error: oklch(0.8 0.12 30);
+  --color-error-dark: oklch(0.7 0.14 30);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}

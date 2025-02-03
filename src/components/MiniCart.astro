@@ -1,0 +1,152 @@
+---
+interface Props {
+  cart: any;
+  isOpen: boolean;
+}
+
+const { cart, isOpen } = Astro.props;
+---
+
+<div 
+  id="cartOverlay"
+  class={`fixed inset-0 bg-background/80 backdrop-blur-sm z-40 transition-opacity ${isOpen ? '' : 'hidden'}`}
+></div>
+
+<div
+  id="miniCart"
+  class={`fixed inset-y-0 right-0 w-full sm:w-[400px] h-full bg-background border-l border-border z-50 shadow-lg transform transition-transform duration-300 ease-out ${
+    isOpen ? 'translate-x-0' : 'translate-x-full'
+  }`}
+>
+  <div class="flex h-full flex-col">
+    <header class="border-b border-border px-6 py-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold">Shopping Cart</h2>
+        <button 
+          id="closeCart" 
+          class="inline-flex items-center justify-center rounded-md text-foreground/60 hover:text-foreground/80 transition-colors"
+          aria-label="Close cart"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="flex-1 overflow-y-auto">
+      {cart?.contents?.nodes?.length > 0 ? (
+        <div class="divide-y divide-border">
+          {cart.contents.nodes.map((item: any) => (
+            <div class="flex gap-4 p-6">
+              <div class="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md border border-border bg-muted">
+                {item.product.node.image ? (
+                  <img
+                    src={item.product.node.image.sourceUrl}
+                    alt={item.product.node.image.altText || item.product.node.name}
+                    class="h-full w-full object-cover object-center"
+                  />
+                ) : (
+                  <div class="flex h-full items-center justify-center">
+                    <svg class="h-8 w-8 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <rect width="18" height="18" x="3" y="3" rx="2" ry="2"></rect>
+                      <circle cx="9" cy="9" r="2"></circle>
+                      <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"></path>
+                    </svg>
+                  </div>
+                )}
+              </div>
+              
+              <div class="flex flex-1 flex-col">
+                <div class="flex justify-between text-base font-medium">
+                  <h3>
+                    <a href={`/product/${item.product.node.slug}`} class="hover:underline">
+                      {item.product.node.name}
+                    </a>
+                  </h3>
+                  <p class="ml-4">{item.total}</p>
+                </div>
+                {item.variation?.node?.name && (
+                  <p class="mt-1 text-sm text-muted-foreground">{item.variation.node.name}</p>
+                )}
+                <div class="flex flex-1 items-end justify-between text-sm">
+                  <div class="flex items-center gap-3">
+                    <label for={`quantity-${item.key}`} class="sr-only">Quantity</label>
+                    <select 
+                      id={`quantity-${item.key}`}
+                      class="rounded-md border border-input bg-background px-2 py-1.5 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                      value={item.quantity}
+                    >
+                      {[1,2,3,4,5,6,7,8,9,10].map(num => (
+                        <option value={num}>{num}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <button 
+                    class="font-medium text-primary hover:text-primary/80 transition-colors"
+                    aria-label={`Remove ${item.product.node.name} from cart`}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div class="flex h-full flex-col items-center justify-center space-y-4 px-6">
+          <div class="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
+            <svg class="h-8 w-8 text-muted-foreground" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="8" cy="21" r="1"></circle>
+              <circle cx="19" cy="21" r="1"></circle>
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"></path>
+            </svg>
+          </div>
+          <div class="text-center">
+            <p class="text-lg font-medium">Your cart is empty</p>
+            <p class="mt-1 text-sm text-muted-foreground">Start adding items to your cart</p>
+          </div>
+        </div>
+      )}
+    </div>
+
+    {cart?.contents?.nodes?.length > 0 && (
+      <div class="border-t border-border px-6 py-4">
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-sm">
+            <p class="text-muted-foreground">Subtotal</p>
+            <p class="font-medium">{cart.subtotal}</p>
+          </div>
+          {cart.discountTotal && parseFloat(cart.discountTotal) > 0 && (
+            <div class="flex items-center justify-between text-sm text-green-600">
+              <p>Discount</p>
+              <p>-{cart.discountTotal}</p>
+            </div>
+          )}
+          {cart.shippingTotal && parseFloat(cart.shippingTotal) > 0 && (
+            <div class="flex items-center justify-between text-sm">
+              <p class="text-muted-foreground">Shipping</p>
+              <p class="font-medium">{cart.shippingTotal}</p>
+            </div>
+          )}
+          <div class="flex items-center justify-between text-sm">
+            <p class="text-muted-foreground">Tax</p>
+            <p class="font-medium">{cart.totalTax}</p>
+          </div>
+          <div class="flex items-center justify-between border-t border-border pt-2 text-base">
+            <p class="font-semibold">Total</p>
+            <p class="font-semibold">{cart.total}</p>
+          </div>
+        </div>
+        
+        <a 
+          href="/checkout"
+          class="mt-4 block w-full rounded-md bg-primary px-3 py-2.5 text-center text-sm font-semibold text-primary-foreground shadow-sm hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-colors"
+        >
+          Proceed to Checkout
+        </a>
+      </div>
+    )}
+  </div>
+</div>

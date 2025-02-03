@@ -1,11 +1,26 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import PageHeader from '../components/ui/PageHeader.astro';
+import CategoryGrid from '../components/categories/CategoryGrid.astro';
+import EmptyState from '../components/ui/EmptyState.astro';
+import { fetchCategories } from '../lib/queries/products/categories';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
+const categories = await fetchCategories();
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="Categories">
+  <PageHeader
+    title="Product Categories"
+    description="Browse our collection of high-quality welding tables and accessories"
+  />
+
+  {categories.length > 0 ? (
+    <CategoryGrid categories={categories} />
+  ) : (
+    <EmptyState
+      title="No Categories Found"
+      description="Check back later for new product categories."
+      icon="folder"
+    />
+  )}
 </Layout>

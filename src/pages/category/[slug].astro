@@ -1,0 +1,77 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import CategoryHeader from '../../components/category/CategoryHeader.astro';
+import ProductGrid from '../../components/product/ProductGrid.astro';
+import EmptyState from '../../components/ui/EmptyState.astro';
+import SortSelect from '../../components/ui/SortSelect.astro';
+import LoadMoreButton from '../../components/ui/LoadMoreButton.astro';
+import { fetchProductsByCategory } from '../../lib/queries/products/list';
+import { fetchCategories } from '../../lib/queries/products/categories';
+
+export async function getStaticPaths() {
+  const categories = await fetchCategories();
+  
+  return categories.map((category) => ({
+    params: { slug: category.slug },
+    props: { category }
+  }));
+}
+
+const { slug } = Astro.params;
+const { category } = Astro.props;
+
+const orderby = Astro.url.searchParams.get('orderby') || 'DATE';
+const after = Astro.url.searchParams.get('after') || null;
+
+const productsData = await fetchProductsByCategory(
+  [slug], 
+  9999, 
+  after, 
+  orderby as 'DATE' | 'PRICE' | 'RATING'
+);
+
+const products = productsData.nodes;
+const pageInfo = productsData.pageInfo;
+
+const sortOptions = [
+  { value: 'DATE', label: 'Latest' },
+  { value: 'PRICE', label: 'Price' },
+  { value: 'RATING', label: 'Rating' }
+];
+---
+
+<Layout title={`${category.name} - Products`}>
+  <div class="space-y-6">
+    <Breadcrumbs 
+      categories={[{
+        name: category.name,
+        slug: category.slug
+      }]}
+    />
+
+    <CategoryHeader 
+      name={category.name}
+      description={category.description}
+      productCount={products.length}
+    >
+      <SortSelect options={sortOptions} selected={orderby} />
+    </CategoryHeader>
+
+    {products.length > 0 ? (
+      <>
+        <ProductGrid products={products} />
+        
+        {pageInfo.hasNextPage && (
+          <LoadMoreButton href={`?after=${pageInfo.endCursor}`} />
+        )}
+      </>
+    ) : (
+      <EmptyState
+        title="No products found"
+        description="We couldn't find any products in this category."
+        icon="cart"
+      />
+    )}
+  </div>
+</Layout>

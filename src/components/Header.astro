@@ -1,0 +1,47 @@
+---
+import MiniCart from './cart/MiniCart';
+import { getCartQuery } from '../lib/queries/cart';
+import { checkGraphQLStatus } from '../lib/graphql';
+
+const cart = await getCartQuery.exec();
+const showCart = Astro.url.searchParams.get('cart') === 'show';
+await checkGraphQLStatus();
+---
+
+<header class="sticky top-0 z-40 w-full border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+  <div class="container flex h-14 max-w-screen-3xl items-center px-4 md:px-6 lg:px-8 mx-auto">
+    <div class="mr-4 flex">
+      <a href="/" class="mr-6 flex items-center space-x-2">
+        <span class="font-bold">STORE</span>
+      </a>
+      <nav class="flex items-center space-x-6 text-sm font-medium">
+        <a href="/shop" class="transition-colors hover:text-foreground/80 text-foreground/60">Shop</a>
+        <a href="/categories" class="transition-colors hover:text-foreground/80 text-foreground/60">Categories</a>
+      </nav>
+    </div>
+    <div class="flex flex-1 items-center justify-end space-x-4">
+      <button 
+        onclick="window.cart.toggle()"
+        class="relative inline-flex items-center justify-center rounded-md text-foreground/60 transition-colors hover:text-foreground/80"
+        aria-label="Shopping cart"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="8" cy="21" r="1"/>
+          <circle cx="19" cy="21" r="1"/>
+          <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+        </svg>
+        {cart?.cart?.contents?.itemCount > 0 && (
+          <span class="absolute -right-1 -top-1 h-4 w-4 rounded-full bg-primary text-[11px] font-medium text-primary-foreground flex items-center justify-center">
+            {cart.cart.contents.itemCount}
+          </span>
+        )}
+      </button>
+    </div>
+  </div>
+
+  <MiniCart client:load initialCart={cart?.cart} initialIsOpen={showCart} />
+</header>
+
+<script>
+  import '../lib/cart';
+</script>

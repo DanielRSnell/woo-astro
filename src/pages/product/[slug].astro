@@ -1,0 +1,128 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import ProductGallery from '../../components/product/ProductGallery';
+import ProductOptions from '../../components/product/ProductOptions';
+import { getAllProductsQuery } from '../../lib/queries/products/all';
+import type { Product, ProductCategory } from '../../types/product';
+
+interface Props {
+  product: Product;
+}
+
+export async function getStaticPaths() {
+  try {
+    const data = await getAllProductsQuery.exec({
+      first: 9999
+    });
+
+    if (!data?.products?.nodes) {
+      console.error('No products found');
+      return [];
+    }
+
+    return data.products.nodes.map(product => ({
+      params: { slug: product.slug },
+      props: { product }
+    }));
+  } catch (error) {
+    console.error('Error fetching products:', error);
+    return [];
+  }
+}
+
+const { product } = Astro.props;
+
+if (!product) {
+  return Astro.redirect('/404');
+}
+
+// Extract and validate categories
+const categories: ProductCategory[] = product.productCategories?.nodes
+  ?.filter((cat): cat is ProductCategory => 
+    Boolean(cat && cat.slug && cat.name && cat.databaseId)
+  ) || [];
+
+// Debug log
+console.log('Product:', {
+  name: product.name,
+  categories: categories.map(c => ({ name: c.name, slug: c.slug }))
+});
+
+const allImages = [
+  product.image,
+  ...(product.galleryImages?.nodes || [])
+].filter(img => img && img.sourceUrl);
+
+const searchParams = new URLSearchParams(Astro.url.search);
+const initialSelections = Object.fromEntries(searchParams);
+
+const findMatchingVariation = () => {
+  if (product.__typename !== 'VariableProduct') return null;
+  
+  const selectedCount = Object.keys(initialSelections).length;
+  const requiredCount = product.variations?.nodes[0]?.attributes.nodes.length || 0;
+  
+  if (selectedCount !== requiredCount) return null;
+
+  return product.variations?.nodes.find(variation =>
+    variation.attributes.nodes.every(attr =>
+      initialSelections[attr.name] === attr.value
+    )
+  );
+};
+
+const initialVariation = findMatchingVariation();
+---
+
+<Layout title={product.name}>
+    <Breadcrumbs 
+      categories={categories}
+      product={product}
+    />
+
+    <div class="grid grid-cols-1 gap-x-12 gap-y-10 lg:grid-cols-2">
+      <ProductGallery 
+        images={allImages} 
+        productName={product.name}
+        client:load
+      />
+
+      <div class="flex flex-col gap-6">
+        <div class="space-y-4">
+          <h1 class="text-3xl font-bold tracking-tight">{product.name}</h1>
+
+          {product.averageRating > 0 && (
+            <div class="flex items-center gap-2">
+              <div class="flex text-primary">
+                {Array.from({ length: 5 }).map((_, i) => (
+                  <span>{i < Math.round(product.averageRating) ? '★' : '☆'}</span>
+                ))}
+              </div>
+              <span class="text-sm text-muted-foreground">
+                {product.reviewCount} {product.reviewCount === 1 ? 'review' : 'reviews'}
+              </span>
+            </div>
+          )}
+
+          {product.shortDescription && (
+            <div class="prose prose-sm text-muted-foreground" set:html={product.shortDescription} />
+          )}
+        </div>
+
+        <ProductOptions
+          product={product}
+          initialVariation={initialVariation}
+          initialSelections={initialSelections}
+          client:load
+        />
+
+        {product.description && (
+          <div class="border-t border-border pt-6 mt-6">
+            <h2 class="text-lg font-semibold mb-4">Product Description</h2>
+            <div class="prose prose-sm max-w-none text-muted-foreground" set:html={product.description} />
+          </div>
+        )}
+      </div>
+    </div>
+</Layout>
